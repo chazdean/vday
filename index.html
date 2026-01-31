@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Will You Be My Valentine?</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5c6d0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 48px 64px;
+      text-align: center;
+      max-width: 680px;
+      width: 90%;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+      position: relative;
+    }
+
+    .svg-container {
+      margin-bottom: 24px;
+    }
+
+    .svg-container img {
+      width: 180px;
+      height: 180px;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+    }
+
+    .svg-placeholder {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      line-height: 1;
+    }
+
+    .question {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2d2d2d;
+      margin-bottom: 32px;
+      line-height: 1.3;
+    }
+
+    .buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 20px;
+      min-height: 60px;
+    }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #ff6b8a, #e8405e);
+      color: #fff;
+      border: none;
+      padding: 18px 56px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(232, 64, 94, 0.4);
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-yes:hover {
+      background: linear-gradient(135deg, #e8405e, #d1354f);
+      transform: scale(1.08);
+      box-shadow: 0 6px 20px rgba(232, 64, 94, 0.5);
+    }
+
+    .btn-no {
+      background: #d4d4d4;
+      color: #444;
+      border: none;
+      padding: 18px 56px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      position: absolute;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+      user-select: none;
+    }
+
+    .hint {
+      font-size: 0.9rem;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    .success {
+      display: none;
+      text-align: center;
+    }
+
+    .success h2 {
+      font-size: 2rem;
+      color: #e8405e;
+      margin-bottom: 16px;
+    }
+
+    .success .gif-container {
+      margin-top: 16px;
+    }
+
+    .success .gif-container img {
+      max-width: 100%;
+      border-radius: 16px;
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        padding: 32px 24px;
+      }
+      .question {
+        font-size: 1.5rem;
+      }
+      .btn-yes, .btn-no {
+        padding: 14px 40px;
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="card">
+    <!-- Main question screen -->
+    <div id="questionScreen">
+      <div class="svg-container">
+        <img src="vday.svg" alt="Valentine">
+      </div>
+
+      <p class="question">subhah will you be my valentine?</p>
+
+      <div class="buttons">
+        <button class="btn-yes" id="yesBtn">Yes</button>
+        <button class="btn-no" id="noBtn">No</button>
+      </div>
+
+      <p class="hint" id="hint">"No" seems a bit shy</p>
+    </div>
+
+    <!-- Success screen shown after clicking Yes -->
+    <div class="success" id="successScreen">
+      <h2>Yay!! I love you so much! 🥰</h2>
+      <div class="gif-container">
+        <img id="successGif" src="https://media.giphy.com/media/GS9pfaxQj5hPKFGGp8/giphy.gif" alt="Celebration">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const card = document.getElementById('card');
+    const questionScreen = document.getElementById('questionScreen');
+    const successScreen = document.getElementById('successScreen');
+    const hint = document.getElementById('hint');
+
+    const shyMessages = [
+      '"No" seems a bit shy',
+      '"No" ran away again!',
+      "You can't catch \"No\"!",
+      'Nice try! "No" is too fast',
+      '"No" doesn\'t want to be clicked',
+      'Give up on "No" already!',
+      '"No" is not an option!',
+      'Just click Yes!',
+    ];
+
+    let messageIndex = 0;
+    let noScale = 1.0;
+    let yesScale = 1.0;
+
+    function getRandomPosition() {
+      const cardRect = card.getBoundingClientRect();
+      const btnWidth = noBtn.offsetWidth;
+      const btnHeight = noBtn.offsetHeight;
+
+      const maxX = cardRect.width - btnWidth - 20;
+      const maxY = cardRect.height - btnHeight - 20;
+
+      const randomX = Math.floor(Math.random() * maxX) + 10;
+      const randomY = Math.floor(Math.random() * maxY) + 10;
+
+      return { x: randomX, y: randomY };
+    }
+
+    function moveNoButton() {
+      const pos = getRandomPosition();
+      noBtn.style.left = pos.x + 'px';
+      noBtn.style.top = pos.y + 'px';
+
+      // Shrink No button
+      noScale = Math.max(0.7, noScale - 0.05);
+      noBtn.style.transform = 'scale(' + noScale + ')';
+
+      // Grow Yes button
+      yesScale = Math.min(1.3, yesScale + 0.05);
+      yesBtn.style.transform = 'scale(' + yesScale + ')';
+
+      messageIndex = (messageIndex + 1) % shyMessages.length;
+      hint.textContent = shyMessages[messageIndex];
+    }
+
+    // Desktop: move on hover
+    noBtn.addEventListener('mouseenter', function (e) {
+      e.preventDefault();
+      moveNoButton();
+    });
+
+    // Mobile: move on touch
+    noBtn.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      moveNoButton();
+    });
+
+    // Yes button shows success screen
+    yesBtn.addEventListener('click', function () {
+      questionScreen.style.display = 'none';
+      successScreen.style.display = 'block';
+    });
+
+    // Position No button centered beside Yes, using the card center as anchor
+    function initNoButton() {
+      noBtn.style.position = 'absolute';
+      const gap = 24;
+
+      // Reset margin so we can measure cleanly
+      yesBtn.style.marginRight = '';
+      const noWidth = noBtn.offsetWidth;
+
+      // Give Yes a right margin equal to No's space so flex centers the pair
+      yesBtn.style.marginRight = (noWidth + gap) + 'px';
+
+      // Position No to the right of Yes's actual location
+      const cardRect = card.getBoundingClientRect();
+      const yesRect = yesBtn.getBoundingClientRect();
+      noBtn.style.left = (yesRect.right - cardRect.left + gap) + 'px';
+      noBtn.style.top = (yesRect.top - cardRect.top) + 'px';
+
+      // Reset scales
+      noScale = 1.0;
+      yesScale = 1.0;
+      noBtn.style.transform = 'scale(1)';
+      yesBtn.style.transform = 'scale(1)';
+    }
+
+    window.addEventListener('load', initNoButton);
+    window.addEventListener('resize', initNoButton);
+  </script>
+
+</body>
+</html>
